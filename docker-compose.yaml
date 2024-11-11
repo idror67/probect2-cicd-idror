@@ -1,0 +1,31 @@
+services:
+  my-app:
+    image: idror/cicd-flask-project:latest
+    ports:
+      - 5054:5052
+    environment:
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_USER=root
+      - DB_PASSWORD=admin
+      - DB_NAME=mydatabase
+    volumes: 
+      - app-data:/app/static/images  
+    depends_on:
+      mysql:
+        condition: service_healthy
+  mysql:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: admin
+      MYSQL_DATABASE: mydatabase
+    volumes:
+      - mysql-data:/var/lib/mysql  
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+volumes:
+  mysql-data:
+  app-data:
