@@ -1,6 +1,6 @@
 services:
   my-app:
-    image: idror/cicd-flask-project:latest
+    image: idror/cicd-flask-project2:latest
     ports:
       - 5054:5052
     environment:
