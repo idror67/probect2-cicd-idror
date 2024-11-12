@@ -1,0 +1,34 @@
+pipeline {
+    agent any
+
+    parameters {
+        choice(name: 'DATABASE_TYPE', choices: ['MYSQL', 'MONGO'], description: 'Choose the database to use')
+    }
+
+    environment {
+        DOCKER = credentials('dockerhub')
+    }
+
+    stages {
+        stage('Build and Push Docker Image') {
+            steps {
+                sh 'docker login -u ${DOCKER_USR} -p ${DOCKER_PSW}'
+                sh 'docker tag cicd-flask-project2 idror/cicd-flask-project2:latest'
+                sh 'docker push idror/cicd-flask-project2:latest'
+            }
+        }
+        stage('Deploy with Docker Compose') {
+            steps {
+                script {
+                    if (params.DATABASE_TYPE == 'MYSQL') {
+                        sh 'docker-compose -f docker-compose.yml down'
+                        sh 'docker-compose -f docker-compose.yml up -d'
+                    } else if (params.DATABASE_TYPE == 'MONGO') {
+                        sh 'docker-compose -f /bonus/docker-compose.mongo.yml down'
+                        sh 'docker-compose -f /bonus/docker-compose.mongo.yml up -d'
+                    }
+                }
+            }
+        }
+    }
+}
